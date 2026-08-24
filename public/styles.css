@@ -392,6 +392,15 @@ body::after {
   }
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Only the headline sits inside the lock. The lede and the buttons live below
    it, so the lock stays whole and the hero stays one screen tall. */
 .hero__copy {
@@ -408,148 +417,6 @@ body::after {
   max-width: 46rem;
   margin: 0 auto;
   padding-bottom: 3.5rem;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ghostlock .pulse,
-  .hero__flash {
-    display: none;
-  }
-}
-
-/* ------------------------------------------------------- the lock, as drawn */
-
-.stage {
-  position: relative;
-  display: flex;
-  justify-content: center;
-}
-
-.lockplate {
-  width: min(100%, 27rem);
-  color: var(--amber);
-  overflow: visible;
-}
-
-/* Construction lines: the diagram admits it is a diagram. */
-.lockplate .rule {
-  stroke: var(--line);
-  stroke-width: 1;
-  fill: none;
-}
-
-.lockplate .tick {
-  stroke: var(--faint);
-  stroke-width: 1;
-}
-
-.lockplate .label {
-  fill: var(--faint);
-  font-family: var(--mono);
-  font-size: 5.5px;
-  letter-spacing: 0.18em;
-}
-
-.lockplate .body,
-.lockplate .shackle,
-.lockplate .keyway {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 3.4;
-  stroke-linecap: round;
-}
-
-.lockplate .plate-fill {
-  fill: rgba(255, 180, 84, 0.05);
-  stroke: none;
-}
-
-/* The shackle is up and open, then it comes down and stays down. */
-.lockplate .shackle {
-  transform-origin: 60px 40px;
-  animation: shackle 0.75s cubic-bezier(0.5, 0, 0.25, 1.35) 0.25s both;
-}
-
-.lockplate .glow {
-  fill: none;
-  stroke: var(--amber);
-  stroke-width: 3.4;
-  opacity: 0;
-  animation: clunk 0.8s ease-out 0.95s;
-}
-
-.lockplate .keyway {
-  animation: fade-in 0.5s ease 1.1s both;
-}
-
-/* A scanner line crossing the plate, forever, slowly. Motion that continues
-   after the page has settled is what keeps it feeling alive rather than
-   staged. */
-.lockplate .scan {
-  fill: var(--amber);
-  opacity: 0.5;
-  animation: scan 6.5s cubic-bezier(0.6, 0, 0.4, 1) 2s infinite;
-}
-
-@keyframes shackle {
-  from {
-    transform: translateY(-16px);
-    opacity: 0;
-  }
-  60% {
-    opacity: 1;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
-}
-
-@keyframes clunk {
-  0% {
-    opacity: 0.9;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.09);
-  }
-}
-
-@keyframes scan {
-  0% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  8% {
-    opacity: 0.55;
-  }
-  46% {
-    opacity: 0.55;
-  }
-  54% {
-    transform: translateY(44px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(44px);
-    opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .lockplate .scan {
-    display: none;
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 .hero__eyebrow {
@@ -678,14 +545,21 @@ body::after {
   animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) 2.15s both;
 }
 
-/* The tree slides under the lock and overlaps it. Depth, not a row of cards. */
+/* The policy file and the tree it produces, side by side. */
 .hero__grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 2rem;
   align-items: start;
   padding-bottom: 4rem;
-  animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) 2.1s both;
+  animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) 2.4s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ghostlock .pulse,
+  .hero__flash {
+    display: none;
+  }
 }
 
 /* ------------------------------------------------------------- deny ticker */
@@ -1270,4 +1144,97 @@ ul.plain li::before {
   left: 0;
   color: var(--amber);
   font-family: var(--mono);
+}
+
+/* ------------------------------------------------------------- narrow ---- */
+
+@media (max-width: 860px) {
+  /* Two panels side by side stop being readable well before they stop
+     fitting. */
+  .hero__grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  /* Wide tables have nowhere to go on a phone; let them scroll rather than
+     crushing a column of paths to four characters. */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  td,
+  th {
+    padding-right: 1.4rem;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --shell: min(1180px, 100% - 2rem);
+  }
+
+  .masthead__inner {
+    height: auto;
+    padding-block: 0.7rem;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+
+  .masthead nav {
+    width: 100%;
+    margin-left: 0;
+    gap: 1.1rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .masthead nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hero {
+    padding-top: 2rem;
+  }
+
+  .hero__stage {
+    padding: 2.5rem 0 2rem;
+  }
+
+  /* The headline needs more lines here, so the lock has to grow past the
+     column to keep holding it. The stage clips the overflow. */
+  .ghostlock {
+    width: 148%;
+  }
+
+  .hero__eyebrow {
+    letter-spacing: 0.18em;
+    font-size: 0.66rem;
+  }
+
+  .section {
+    padding: 3rem 0;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabs button {
+    padding-inline: 0.8rem;
+  }
+
+  pre {
+    font-size: 0.76rem;
+  }
+
+  .footer__spacer {
+    margin-left: 0;
+  }
 }
