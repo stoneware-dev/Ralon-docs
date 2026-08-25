@@ -15,6 +15,12 @@ const CHANNELS = [
     note: "# prebuilt binary; npm refuses the name `ralon`",
   },
   {
+    id: "bun",
+    label: "bun",
+    command: "bun install -g ralonlock",
+    note: "# prebuilt binary; bun refuses the name `ralon`",
+  },
+  {
     id: "pip",
     label: "pip",
     command: "pip install ralonlock",
