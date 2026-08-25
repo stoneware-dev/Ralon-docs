@@ -52,46 +52,55 @@ export default function Home(_props: PageProps) {
               <a class="button" href="#try">
                 Try to break it
               </a>
+              {/* No badge: a shield image is a request to another origin, and
+                  this site does not make any. A link costs nothing. */}
+              <a
+                class="button"
+                href="https://github.com/stoneware-dev/Ralon"
+                rel="noopener"
+              >
+                ★ Star on GitHub
+              </a>
             </div>
           </div>
 
           <div class="ticker" aria-hidden="true">
             <div class="ticker__track">
               <span>
-                <b>EROFS</b> read-only file system
+                <b>EROFS</b> protected by Ralon
               </span>
               <span>
-                <b>EACCES</b> permission denied
+                <b>EACCES</b> protected by Ralon
               </span>
               <span>
-                <b>EBUSY</b> device or resource busy
+                <b>EBUSY</b> protected by Ralon
               </span>
               <span>
-                <b>EXDEV</b> invalid cross-device link
+                <b>EXDEV</b> protected by Ralon
               </span>
               <span>
-                <b>EPERM</b> operation not permitted
+                <b>EPERM</b> protected by Ralon
               </span>
               <span>
-                <b>ERROR_SHARING_VIOLATION</b> the file is in use
+                <b>ERROR_SHARING_VIOLATION</b> protected by Ralon
               </span>
               <span>
-                <b>EROFS</b> read-only file system
+                <b>EROFS</b> protected by Ralon
               </span>
               <span>
-                <b>EACCES</b> permission denied
+                <b>EACCES</b> protected by Ralon
               </span>
               <span>
-                <b>EBUSY</b> device or resource busy
+                <b>EBUSY</b> protected by Ralon
               </span>
               <span>
-                <b>EXDEV</b> invalid cross-device link
+                <b>EXDEV</b> protected by Ralon
               </span>
               <span>
-                <b>EPERM</b> operation not permitted
+                <b>EPERM</b> protected by Ralon
               </span>
               <span>
-                <b>ERROR_SHARING_VIOLATION</b> the file is in use
+                <b>ERROR_SHARING_VIOLATION</b> protected by Ralon
               </span>
             </div>
           </div>
