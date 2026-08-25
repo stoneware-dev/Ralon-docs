@@ -2,7 +2,7 @@ import { seo } from "stoneware";
 import type { Child } from "stoneware";
 import { siteURL } from "./site.ts";
 
-export const VERSION = "0.1.3";
+export const VERSION = "0.1.4";
 
 export interface LayoutProps {
   title: string;
