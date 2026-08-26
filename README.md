@@ -10,14 +10,35 @@ The docs for [Ralon](https://github.com/stoneware-dev/Ralon), built with
 
 ## Pages
 
-    /            what it is, the interactive attack demo, install, quickstart
-    /reference   agent.lock syntax, patterns, commands, exit codes, backends
+    /            what it is, the interactive attack demo, install, the
+                 per-platform quickstart
+    /reference   agent.lock syntax, patterns, every command, scopes, exit
+                 codes, the four backends
     /security    threat model, the guarantee, why it holds, where it stops
 
 `/security` is not marketing. It carries the limitations that were tested
 rather than assumed — the second-mount bypass, what Landlock alone gives up,
-and the fact that only paths that already exist can be protected. If a release
+that only paths which already exist can be protected, and that the macOS
+supervisor is a narrowing an agent can undo rather than a sandbox. If a release
 changes any of that, this page changes with it.
+
+## The model the site has to get across
+
+    install once → declare policy → enforcement starts automatically
+
+Three claims, in that order, and the third is the one people disbelieve. A
+repository is protected *because it contains an `agent.lock`* — no `ralon init`,
+no wrapper around the agent, nothing to redo after a reboot.
+
+Two things the copy must never soften:
+
+- **Where Ralon is installed does not decide what it protects.** A home
+  directory on `C:` says nothing about a repository on `D:`. Scopes are how the
+  developer says where their code is, and the site should show
+  `ralon scope add D:\Projects` rather than implying a single tree.
+- **Linux has no supervisor, and macOS's is weaker than `ralon run`.** The
+  macOS one enforces with `chflags uchg`, which an agent can undo. Every page
+  that mentions automatic enforcement says which platform it means.
 
 ## Layout
 
@@ -56,6 +77,10 @@ which is the right default for a site about not trusting software.
 the install block. `islands/InstallTabs.tsx` repeats it in the sample output.
 Both need bumping when Ralon releases — two places, on purpose, rather than a
 build step.
+
+`/reference` lists the commands by hand. When Ralon gains or renames one, that
+table is the thing that goes stale silently, because nothing here is generated
+from the CLI: check it against `ralon --help` at each release.
 
 The command is `ralon` everywhere. The crate is `ralon`; npm and PyPI both use
 `ralonlock`, because npm refuses `ralon` as too close to an existing package and

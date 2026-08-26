@@ -50,8 +50,9 @@ const PLATFORMS: Platform[] = [
   {
     id: "windows",
     label: "Windows",
-    shell: "ralon guard --detach   →   cmd.exe",
-    backend: "locks backend · a guard holds them; this shell never heard of ralon",
+    shell: "supervisor holds it   →   cmd.exe",
+    backend:
+      "locks backend · the supervisor holds them; this shell never heard of ralon",
     refused: "# the file is untouched — some tools still exit 0, so check the file",
   },
 ];

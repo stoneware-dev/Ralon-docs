@@ -40,9 +40,10 @@ export default function Home(_props: PageProps) {
           <div class="hero__below">
             <p class="hero__lede">
               You write the list. Ralon hands it to the kernel — Linux, macOS
-              and Windows — before your agent starts, and from that moment the
-              write is refused. Not a matter of the agent's judgement, its
-              prompt, or its mood.
+              and Windows — and from that moment the write is refused. Not a
+              matter of the agent's judgement, its prompt, or its mood. Set the
+              machine up once and a repository is protected{" "}
+              <em>because it contains the file</em>; there is no second command.
             </p>
 
             <div class="button-row">
@@ -238,13 +239,15 @@ export default function Home(_props: PageProps) {
             <h2>Starting it, on each platform</h2>
           </div>
           <p class="prose-lead">
-            <code>ralon init</code> is the same everywhere: it writes a starter{" "}
-            <code>agent.lock</code> and wires a refusal into every agent that
-            documents a hook. What comes after it is not the same, and the
-            difference is the whole design rather than a rough edge —{" "}
-            <b>Linux and macOS restrictions are inherited</b> by a process before
-            it runs, <b>Windows locks are held</b> by a process and refused to
-            everyone else.
+            On <b>Windows and macOS</b> the whole workflow is{" "}
+            <b>install once → declare policy → enforcement starts
+            automatically</b>. There is no third step and nothing to run inside a
+            repository: writing an <code>agent.lock</code> is what turns
+            enforcement on, and deleting it is what turns enforcement off. On{" "}
+            <b>Linux</b> there is no supervisor, and that is a difference in
+            kernels rather than a rough edge — Linux restrictions are{" "}
+            <b>inherited</b> by a process before it runs and cannot be imposed on
+            one already running, so you wrap the agent instead, which is stronger.
           </p>
 
           <figure>
@@ -333,6 +336,15 @@ export default function Home(_props: PageProps) {
               Seatbelt can say <code>deny</code>, so the profile is the policy as
               you wrote it: a protected directory covers files created in it
               later, and nothing outside the named paths changes behaviour.
+              <br />
+              <br />
+              <code>ralon install</code> works here too, and enforces with
+              something weaker, which is worth saying plainly. A Seatbelt profile
+              is inherited and so cannot be imposed on an agent nobody started; a
+              supervisor uses <code>chflags uchg</code> instead, which refuses
+              every ordinary write from every process and which an agent can undo
+              by running <code>chflags nouchg</code>. It is a narrowing, not a
+              sandbox, and it is not equivalent to <code>run</code>.
             </figcaption>
           </figure>
 
@@ -341,44 +353,49 @@ export default function Home(_props: PageProps) {
               <div class="panel__bar">
                 <i class="dot" />
                 <b>Windows</b>
-                <span class="panel__bar-note">exclusive file handles</span>
+                <span class="panel__bar-note">
+                  exclusive file handles, held by a supervisor
+                </span>
               </div>
               <pre>
                 <span class="p">$ </span>
-                <b>ralon init</b>
+                <b>ralon install</b>
+                {"                "}
+                <span class="c"># once, ever</span>
+                {"\n"}
+                scope{"      "}C:\Users\dev{"\n"}
+                registered a Task Scheduler logon task{"\n\n"}
+                <span class="c">
+                  No scope covers D:\ — an agent.lock there is not enforced.
+                </span>
+                {"\n"}
+                <span class="c">If that is where you keep code:</span>
+                {"\n"}
+                <span class="c">{"  "}ralon scope add D:\Projects</span>
+                {"\n\n"}
+                <span class="p">$ </span>
+                <b>ralon scope add D:\Projects</b>
+                {"\n"}
+                scope{"      "}D:\Projects{"\n"}
+                enforcing{"  "}3 projects{"\n\n"}
+                <span class="p">$ </span>
+                <b>cd D:\Projects\my-app</b>
                 {"\n"}
                 <span class="p">$ </span>
                 <b>notepad agent.lock</b>
-                {"\n\n"}
-                <span class="p">$ </span>
-                <b>ralon guard --detach</b>
-                {"         "}
-                <span class="c"># no command to wrap</span>
-                {"\n"}
-                guard running in the background for C:\project{"\n"}
-                every process on this machine is now refused those paths{"\n"}
-                stop it with: ralon guard --stop{"\n\n"}
-                <span class="p">$ </span>
-                <b>claude</b>
-                {"                       "}
-                <span class="c">
-                  # start the agent however you like
-                </span>
-                {"\n\n"}
-                <span class="p">$ </span>
-                <b>ralon guard --stop</b>
-                {"           "}
-                <span class="c"># when you want to edit them yourself</span>
-                {"\n"}
-                guard released — the protected paths are writable again
+                {"       "}
+                <span class="c"># …that is the entire remaining step</span>
               </pre>
             </div>
             <figcaption>
-              No <code>ralon run</code> in sight. Because the locks are held
-              rather than inherited, one background process covers agents Ralon
-              never started — from an IDE, an extension, another terminal, or
-              installed next month. <code>ralon run -- claude</code> also works
-              here and lasts exactly as long as the command.
+              No <code>ralon run</code> in sight, and nothing per repository.
+              Because the locks are held rather than inherited, one background
+              process covers agents Ralon never started — from an IDE, an
+              extension, another terminal, or installed next month.{" "}
+              <b>Where Ralon is installed does not decide what it protects:</b> a
+              home directory on <code>C:</code> says nothing about a repository
+              on <code>D:</code>, so <code>install</code> names the drives no
+              scope reaches instead of guessing.
             </figcaption>
           </figure>
 
@@ -391,7 +408,11 @@ export default function Home(_props: PageProps) {
               it is, and agents write through <code>cmd</code>,{" "}
               <code>python</code>, <code>node</code> and <code>git</code>, the
               same binaries you use. The only person it gets in the way of is
-              you, which is what <code>--stop</code> is for.
+              you — <code>agent.lock</code> protects itself, so you cannot rewrite
+              your own policy while it is enforced, which is what{" "}
+              <code>ralon pause</code> is for. A pause expires on its own by
+              default: one that is forgotten about is a project that stopped
+              being protected without anyone deciding it should.
             </p>
           </div>
         </section>

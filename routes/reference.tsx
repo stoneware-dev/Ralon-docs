@@ -14,7 +14,7 @@ export default function Reference(_props: PageProps) {
     <Layout
       path="/reference"
       title="Reference — Ralon"
-      description="agent.lock syntax, pattern semantics, the four commands, exit codes, and how the mount and landlock backends differ."
+      description="agent.lock syntax, pattern semantics, every command, scopes, exit codes, and how the four enforcement backends differ."
     >
       <main class="shell with-rail">
         <aside class="rail">
@@ -174,11 +174,59 @@ export default function Reference(_props: PageProps) {
               <tbody>
                 <tr>
                   <td>
-                    <code>ralon init</code>
+                    <code>ralon install</code>
                   </td>
                   <td>
-                    Writes a starter <code>agent.lock</code>. Refuses to
-                    overwrite one without <code>--force</code>.
+                    Registers the per-user background supervisor — a Task
+                    Scheduler logon task on Windows, a launchd LaunchAgent on
+                    macOS. Additive: re-running it never drops a scope. Fails on
+                    Linux, with the reason. <code>--scope</code> names a
+                    directory, <code>--no-hooks</code> skips configuring agents,{" "}
+                    <code>--dry-run</code> registers nothing.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>ralon scope add|list|remove</code>
+                  </td>
+                  <td>
+                    The directories a policy is honoured in. Where Ralon is
+                    installed does not decide this — a home directory on{" "}
+                    <code>C:</code> says nothing about a repository on{" "}
+                    <code>D:</code>. Scopes are kept disjoint and canonical;{" "}
+                    <code>add</code> and <code>remove</code> reconcile before
+                    returning.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>ralon pause</code> / <code>resume</code>
+                  </td>
+                  <td>
+                    Releases one project so its own policy can be edited, because{" "}
+                    <code>agent.lock</code> protects itself. Expires after fifteen
+                    minutes unless <code>--indefinitely</code> is given.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>ralon uninstall</code>
+                  </td>
+                  <td>
+                    Deregisters the supervisor and releases every project it
+                    held. <code>--keep-enforcement</code> leaves the enforcement
+                    in place with nothing watching it.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>ralon status</code>
+                  </td>
+                  <td>
+                    The policy, the protected paths on disk, the backends this
+                    kernel offers, and three separate answers: is the supervisor
+                    registered, is it running, and is <em>this project</em>{" "}
+                    protected.
                   </td>
                 </tr>
                 <tr>
@@ -193,15 +241,6 @@ export default function Reference(_props: PageProps) {
                 </tr>
                 <tr>
                   <td>
-                    <code>ralon status</code>
-                  </td>
-                  <td>
-                    The policy, the count of protected paths on disk, and which
-                    backends this kernel actually offers.
-                  </td>
-                </tr>
-                <tr>
-                  <td>
                     <code>ralon run -- &lt;cmd&gt;</code>
                   </td>
                   <td>
@@ -211,11 +250,57 @@ export default function Reference(_props: PageProps) {
                     <code>--quiet</code> drops the summary line.
                   </td>
                 </tr>
+                <tr>
+                  <td>
+                    <code>ralon guard</code>
+                  </td>
+                  <td>
+                    One project's enforcement, held with no command to supervise —
+                    what the supervisor starts, by hand. <code>--detach</code>{" "}
+                    backgrounds it, <code>--stop</code> releases it.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>ralon init</code>
+                  </td>
+                  <td>
+                    Writes a starter <code>agent.lock</code> and configures the
+                    agents. Refuses to overwrite a policy without{" "}
+                    <code>--force</code>. Not needed under a supervisor: writing
+                    the file by hand is the whole step.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>ralon hook install</code>
+                  </td>
+                  <td>
+                    Writes the refusal into nine agents' own configuration, so a
+                    blocked write reads as "protected by Ralon" rather than{" "}
+                    <code>EBUSY</code>. Done automatically for each project the
+                    supervisor enforces.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>ralon daemon</code>
+                  </td>
+                  <td>
+                    The supervisor itself, started by the operating system rather
+                    than by people. <code>--once</code> does a single pass and
+                    prints what changed.
+                  </td>
+                </tr>
               </tbody>
             </table>
             <p>
               Every command takes <code>--dir</code> to point at a project other
-              than the working directory.
+              than the working directory. Supervisor state — the scopes, the
+              recorded workspaces and the log — lives in{" "}
+              <code>%LOCALAPPDATA%\Ralon</code> or{" "}
+              <code>~/Library/Application Support/Ralon</code>, relocatable with{" "}
+              <code>RALON_HOME</code>.
             </p>
           </section>
 

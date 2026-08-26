@@ -215,6 +215,39 @@ export default function Security(_props: PageProps) {
                 life of that run. Restart the agent after adding files that need
                 protecting.
               </li>
+              <li>
+                <b>A supervisor is a process, on Windows.</b> Killing it releases
+                the locks. <code>run</code> has nothing to kill, which is why it
+                stays the stronger option for an agent you launch yourself. On
+                macOS the failure runs the other way: the flag is on the inode
+                and survives everything, so a supervisor that is killed leaves
+                state behind rather than losing protection —{" "}
+                <code>status</code> reports it and{" "}
+                <code>ralon guard --stop</code> clears it.
+              </li>
+              <li>
+                <b>The macOS supervisor is a narrowing, not a sandbox.</b> It
+                enforces with <code>chflags uchg</code>, which an agent can undo
+                with <code>chflags nouchg</code> — one command, no privileges.
+                Every ordinary write is refused; an agent that goes looking will
+                find a way through. It also does not pin ancestors, so renaming a
+                parent directory moves the protected path out from under the
+                policy while leaving the file itself immutable.{" "}
+                <code>ralon run</code> has neither limitation.
+              </li>
+              <li>
+                <b>A policy outside every scope does nothing.</b> Ralon honours an{" "}
+                <code>agent.lock</code> only inside a directory you named with{" "}
+                <code>ralon scope add</code> — which is what stops one arriving
+                inside a downloaded archive from locking files, and what makes{" "}
+                <code>ralon status</code> say{" "}
+                <em>policy found, but this project is outside every scope</em>{" "}
+                rather than looking protected. Even inside a scope the blast
+                radius is small: patterns are relative to the file that declares
+                them and <code>..</code>, absolute paths and <code>~</code> are
+                rejected, so the most a hostile policy can do is make its own
+                directory read-only.
+              </li>
             </ul>
           </section>
 
