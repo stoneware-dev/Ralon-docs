@@ -13,14 +13,16 @@ The docs for [Ralon](https://github.com/stoneware-dev/Ralon), built with
     /            what it is, the interactive attack demo, install, the
                  per-platform quickstart
     /reference   agent.lock syntax, patterns, every command, scopes, exit
-                 codes, the four backends
+                 codes, the five backends
     /security    threat model, the guarantee, why it holds, where it stops
 
 `/security` is not marketing. It carries the limitations that were tested
-rather than assumed — the second-mount bypass, what Landlock alone gives up,
-that only paths which already exist can be protected, and that the macOS
-supervisor is a narrowing an agent can undo rather than a sandbox. If a release
-changes any of that, this page changes with it.
+rather than assumed — the second-mount bypass, hard links as a second name for
+the same bytes, what Landlock alone gives up, that only paths which already
+exist can be protected, that the macOS supervisor is a narrowing an agent can
+undo rather than a sandbox, and that Ralon's own files are user-writable and
+therefore held rather than trusted. If a release changes any of that, this page
+changes with it.
 
 ## The model the site has to get across
 
@@ -30,7 +32,7 @@ Three claims, in that order, and the third is the one people disbelieve. A
 repository is protected *because it contains an `agent.lock`* — no `ralon init`,
 no wrapper around the agent, nothing to redo after a reboot.
 
-Two things the copy must never soften:
+Four things the copy must never soften:
 
 - **Where Ralon is installed does not decide what it protects.** A home
   directory on `C:` says nothing about a repository on `D:`. Scopes are how the
@@ -39,6 +41,16 @@ Two things the copy must never soften:
 - **Linux has no supervisor, and macOS's is weaker than `ralon run`.** The
   macOS one enforces with `chflags uchg`, which an agent can undo. Every page
   that mentions automatic enforcement says which platform it means.
+- **Machine-wide is a choice, not a requirement.** Some people want one
+  repository protected and nothing else touched. `ralon install --here` scopes
+  to a single project, and `ralon guard --detach` protects one with no
+  installation at all. Both belong next to the machine-wide flow rather than in
+  a footnote — presenting `install` as the only route reads as a bigger
+  commitment than it is.
+- **`ralon uninstall` is a step the user has to take.** It registers a
+  background process with the OS and no package manager will deregister it: npm
+  stopped running `preuninstall` scripts, and pip and cargo never had the hook.
+  Anywhere the site says how to install, it says this too.
 
 ## Layout
 

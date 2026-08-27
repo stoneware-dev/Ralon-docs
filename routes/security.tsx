@@ -236,6 +236,33 @@ export default function Security(_props: PageProps) {
                 <code>ralon run</code> has neither limitation.
               </li>
               <li>
+                <b>A hard link is a second name for the same bytes.</b> A
+                protected file that has one is reachable through it: that path is
+                an ordinary file, not mounted, not carved out, not locked, and
+                writing it changes the protected file. Nothing about the
+                enforcement can prevent this, so it is warned about instead — by{" "}
+                <code>check</code>, by <code>status</code>, and by the supervisor
+                into its log as it starts enforcing. The Windows implementation
+                returned an empty list until recently, which meant the one
+                platform whose enforcement <em>is</em> holding file handles never
+                mentioned a second handle-able name; NTFS has hard links and{" "}
+                <code>mklink /H</code> needs no privilege.
+              </li>
+              <li>
+                <b>Ralon's own files are user-writable, and it holds them.</b>{" "}
+                Nothing here asks for administrator, so the supervisor's binary
+                and its scope list sit in a directory you can write — which left
+                two silent paths: replace the binary and own the supervisor at the
+                next logon, or delete a line from the scope file and unprotect
+                every project under it. A running supervisor now holds both, and
+                rename, overwrite, delete and scope-wipe are all refused. This is
+                protection while it <em>runs</em>, and it does not stop an agent
+                using Ralon's own interface — anything that can run{" "}
+                <code>ralon scope remove</code> can remove a scope, because there
+                is no password and no approval step by design. That is the same
+                boundary that lets an agent kill a guard.
+              </li>
+              <li>
                 <b>A policy outside every scope does nothing.</b> Ralon honours an{" "}
                 <code>agent.lock</code> only inside a directory you named with{" "}
                 <code>ralon scope add</code> — which is what stops one arriving

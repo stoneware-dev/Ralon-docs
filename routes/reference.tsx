@@ -14,7 +14,7 @@ export default function Reference(_props: PageProps) {
     <Layout
       path="/reference"
       title="Reference — Ralon"
-      description="agent.lock syntax, pattern semantics, every command, scopes, exit codes, and how the four enforcement backends differ."
+      description="agent.lock syntax, pattern semantics, every command, scopes, exit codes, and how the five enforcement backends differ."
     >
       <main class="shell with-rail">
         <aside class="rail">
@@ -49,9 +49,6 @@ export default function Reference(_props: PageProps) {
                   <b>agent.lock</b>
                 </div>
                 <pre>
-                  <span class="c">version:</span> 1{"  "}
-                  <span class="c"># required, must be 1</span>
-                  {"\n\n"}
                   <span class="c">protect:</span>{"  "}
                   <span class="c"># paths relative to this file</span>
                   {"\n"} - .env{"            "}
@@ -78,8 +75,20 @@ export default function Reference(_props: PageProps) {
                 is worse than no policy.
               </li>
               <li>
-                Unknown keys and unknown versions are errors, so a file written
-                for a later Ralon fails loudly instead of being half-applied.
+                Unknown keys are errors, so <code>protects:</code> fails loudly
+                instead of parsing as a policy that happens to protect nothing.
+              </li>
+              <li>
+                <code>version:</code> is optional and means <code>1</code>. Files
+                that state it still work and <code>version: 2</code> is still
+                refused — it just was not earning its line, since "no version
+                stated" says version one perfectly well and always will.
+              </li>
+              <li>
+                An <b>empty</b> <code>agent.lock</code> is refused rather than
+                treated as a policy with nothing in it. "Enforced, protecting
+                nothing" is the one status that must never be reassuring, and{" "}
+                <code>touch agent.lock</code> is an easy way to reach it.
               </li>
             </ul>
           </section>
@@ -181,8 +190,9 @@ export default function Reference(_props: PageProps) {
                     Scheduler logon task on Windows, a launchd LaunchAgent on
                     macOS. Additive: re-running it never drops a scope. Fails on
                     Linux, with the reason. <code>--scope</code> names a
-                    directory, <code>--no-hooks</code> skips configuring agents,{" "}
-                    <code>--dry-run</code> registers nothing.
+                    directory, <code>--here</code> covers only the project you
+                    are standing in, <code>--no-hooks</code> skips configuring
+                    agents, <code>--dry-run</code> registers nothing.
                   </td>
                 </tr>
                 <tr>
@@ -195,7 +205,10 @@ export default function Reference(_props: PageProps) {
                     <code>C:</code> says nothing about a repository on{" "}
                     <code>D:</code>. Scopes are kept disjoint and canonical;{" "}
                     <code>add</code> and <code>remove</code> reconcile before
-                    returning.
+                    returning. A running supervisor holds the scope file against
+                    writers, so these commands ask it to stand down, write, and
+                    start it again — the guards keep holding their projects
+                    throughout.
                   </td>
                 </tr>
                 <tr>
@@ -213,9 +226,12 @@ export default function Reference(_props: PageProps) {
                     <code>ralon uninstall</code>
                   </td>
                   <td>
-                    Deregisters the supervisor and releases every project it
-                    held. <code>--keep-enforcement</code> leaves the enforcement
-                    in place with nothing watching it.
+                    Deregisters the supervisor, releases every project it held,
+                    and removes its copy of the binary.{" "}
+                    <code>--keep-enforcement</code> leaves the enforcement in
+                    place with nothing watching it. Run this{" "}
+                    <em>before</em> removing the ralon package — no package
+                    manager can do it for you.
                   </td>
                 </tr>
                 <tr>
@@ -226,7 +242,9 @@ export default function Reference(_props: PageProps) {
                     The policy, the protected paths on disk, the backends this
                     kernel offers, and three separate answers: is the supervisor
                     registered, is it running, and is <em>this project</em>{" "}
-                    protected.
+                    protected. It also names a registration left pointing at a
+                    binary that no longer exists — the state a machine reaches by
+                    removing the ralon package without deregistering first.
                   </td>
                 </tr>
                 <tr>
@@ -256,8 +274,11 @@ export default function Reference(_props: PageProps) {
                   </td>
                   <td>
                     One project's enforcement, held with no command to supervise —
-                    what the supervisor starts, by hand. <code>--detach</code>{" "}
-                    backgrounds it, <code>--stop</code> releases it.
+                    what the supervisor starts, by hand, and the way to protect a
+                    repository without installing anything. <code>--detach</code>{" "}
+                    backgrounds it, <code>--stop</code> releases it. The claim is
+                    machine-wide, so a guard the supervisor started is visible to
+                    and stoppable from your own terminal.
                   </td>
                 </tr>
                 <tr>
@@ -297,10 +318,19 @@ export default function Reference(_props: PageProps) {
             <p>
               Every command takes <code>--dir</code> to point at a project other
               than the working directory. Supervisor state — the scopes, the
-              recorded workspaces and the log — lives in{" "}
-              <code>%LOCALAPPDATA%\Ralon</code> or{" "}
+              recorded workspaces, the log, and Ralon's own copy of the binary —
+              lives in <code>%LOCALAPPDATA%\Ralon</code> or{" "}
               <code>~/Library/Application Support/Ralon</code>, relocatable with{" "}
               <code>RALON_HOME</code>.
+            </p>
+            <p>
+              The copy is why <code>install</code> registers a path of its own
+              rather than wherever the executable happened to be. Most installs
+              put that inside a package manager's directory, and Windows will not
+              delete the image of a running process — so a supervisor running
+              from <code>node_modules</code> made its own package impossible to
+              uninstall, with an error about permissions rather than about a
+              running process.
             </p>
           </section>
 
@@ -363,6 +393,66 @@ export default function Reference(_props: PageProps) {
               <code>ralon status</code> shows what is available and{" "}
               <code>--backend</code> pins it.
             </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Backend</th>
+                  <th>Platform</th>
+                  <th>Mechanism</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <code>mount</code>
+                  </td>
+                  <td>Linux</td>
+                  <td>read-only bind mounts in a locked namespace</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>landlock</code>
+                  </td>
+                  <td>Linux</td>
+                  <td>the kernel LSM, where namespaces are unavailable</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>seatbelt</code>
+                  </td>
+                  <td>macOS</td>
+                  <td>
+                    the policy compiled to SBPL and applied with{" "}
+                    <code>sandbox_init</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>immutable</code>
+                  </td>
+                  <td>macOS</td>
+                  <td>
+                    <code>chflags uchg</code> — what the supervisor uses, and a
+                    narrowing rather than a sandbox
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>locks</code>
+                  </td>
+                  <td>Windows</td>
+                  <td>exclusive share-mode handles, refused to every process</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              The first three are <em>inherited</em> — applied to a process
+              before it starts and impossible to impose on one already running,
+              which is why <code>run</code> exists and why Linux has no
+              supervisor. The last two are <em>imposed</em> — held by one process
+              and refused to everybody else — which is why a guard can protect
+              agents it did not start.
+            </p>
 
             <h3>mount — the default</h3>
             <p>
@@ -395,6 +485,41 @@ export default function Reference(_props: PageProps) {
                 which directories are affected.
               </p>
             </div>
+
+            <h3>seatbelt — macOS, under run</h3>
+            <p>
+              The policy compiled to SBPL and applied with{" "}
+              <code>sandbox_init</code> before the command starts. The only
+              mechanism here that can say <em>deny</em> outright, so it needs no
+              carve-out and no ACL: a protected directory covers whatever is
+              created in it later, and ancestors are denied as literal nodes so
+              none of them can be renamed while staying writable inside.
+            </p>
+
+            <h3>immutable — macOS, under the supervisor</h3>
+            <p>
+              <code>chflags uchg</code> on each protected path. It is the only
+              way to impose a restriction on a process you did not start without
+              asking for root, and it is honestly weaker than the other four:
+              an agent undoes it with <code>chflags nouchg</code>, and it cannot
+              pin an ancestor without also freezing it, so renaming an
+              unprotected parent directory moves the path out from under the
+              policy. <code>ralon run</code> has neither limitation, and{" "}
+              <code>ralon status</code> warns when a policy has an ancestor
+              exposed this way.
+            </p>
+
+            <h3>locks — Windows</h3>
+            <p>
+              Exclusive share-mode handles on every protected path, held for as
+              long as Ralon holds them and refused to every process on the
+              machine — no cooperation required from the thing being refused.
+              Directories are narrowed with an ACL as well, because a handle on a
+              directory does not stop files being created inside it. The handles
+              are a property of the file object rather than of a session, so a
+              guard started by the supervisor in the background is refusing
+              writes from your terminal too.
+            </p>
           </section>
         </div>
       </main>

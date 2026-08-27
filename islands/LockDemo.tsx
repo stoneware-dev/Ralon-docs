@@ -176,15 +176,15 @@ const ATTACKS: { id: string; label: string; on: Record<Shell, Attempt> }[] = [
     label: "rewrite the policy",
     on: {
       linux: {
-        command: "echo 'version: 1' > agent.lock",
+        command: "echo 'protect: []' > agent.lock",
         output: "sh: agent.lock: Read-only file system",
       },
       macos: {
-        command: "echo 'version: 1' > agent.lock",
+        command: "echo 'protect: []' > agent.lock",
         output: "sh: agent.lock: Operation not permitted",
       },
       windows: {
-        command: "echo version: 1 > agent.lock",
+        command: "echo protect: [] > agent.lock",
         output:
           "The process cannot access the file because it is being used by another process.",
       },

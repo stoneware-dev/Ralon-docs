@@ -115,7 +115,6 @@ export default function Home(_props: PageProps) {
                     <b>agent.lock</b>
                   </div>
                   <pre>
-                    <span class="c">version:</span> 1{"\n\n"}
                     <span class="c">protect:</span>
                     {"\n"} - src/index.tsx
                     {"\n"} - src/auth.ts
@@ -187,7 +186,7 @@ export default function Home(_props: PageProps) {
               <b>Linux</b> mount namespaces · Landlock
             </span>
             <span>
-              <b>macOS</b> the Seatbelt sandbox
+              <b>macOS</b> Seatbelt · chflags
             </span>
             <span>
               <b>Windows</b> exclusive file handles
@@ -230,6 +229,15 @@ export default function Home(_props: PageProps) {
             <code>ralon status</code> says which mechanism you are getting and
             why — and if this machine offers none, <code>run</code> refuses to
             start the command rather than running it unprotected.
+          </p>
+          <p>
+            To remove it, run <code>ralon uninstall</code> <b>before</b>{" "}
+            uninstalling the package. <code>ralon install</code> registers a
+            background process with the operating system and no package manager
+            knows about that — nor can any of them do it for you: npm stopped
+            running <code>preuninstall</code> scripts, and pip and cargo never
+            had the hook. The supervisor runs from its own copy of the binary, so
+            removing the package itself always works.
           </p>
         </section>
 
@@ -399,6 +407,35 @@ export default function Home(_props: PageProps) {
             </figcaption>
           </figure>
 
+          <p>
+            If you would rather not register anything machine-wide, both smaller
+            shapes work and neither needs a scope. <code>ralon install --here</code>{" "}
+            covers one repository across reboots and watches nothing else;{" "}
+            <code>ralon guard --detach</code> protects the repository you are
+            standing in right now, for as long as it runs, with no installation
+            at all.
+          </p>
+          <figure>
+            <div class="panel">
+              <pre>
+                <span class="p">$ </span>
+                <b>cd my-project</b>
+                {"\n"}
+                <span class="p">$ </span>
+                <b>ralon install --here</b>
+                {"\n"}
+                scope{"      "}D:\Projects\my-project{"   "}
+                <span class="c">(this project only)</span>
+                {"\n"}
+                enforcing{"  "}1 project{"\n\n"}
+                <span class="p">$ </span>
+                <b>ralon guard --detach</b>
+                {"    "}
+                <span class="c"># or: no install at all</span>
+              </pre>
+            </div>
+          </figure>
+
           <div class="callout">
             <p>
               A guard refuses <b>writes to the paths you declared</b> and
@@ -442,8 +479,19 @@ export default function Home(_props: PageProps) {
             <div class="card">
               <h4>Nothing to bypass</h4>
               <p>
-                No daemon, no approval workflow, no file descriptor handed to
+                No approval workflow, no password, no file descriptor handed to
                 the child. Under <code>run</code>, Ralon becomes your command.
+                The supervisor adds no mechanism of its own — it runs the
+                lifecycle of a guard you could have started by hand.
+              </p>
+            </div>
+            <div class="card">
+              <h4>It guards itself</h4>
+              <p>
+                While it runs, the supervisor holds its own binary and its own
+                scope list: they cannot be replaced, renamed, deleted, or edited
+                out from under it. Everything Ralon relies on sits in a directory
+                you can write, because none of it asks for administrator.
               </p>
             </div>
             <div class="card">
@@ -456,7 +504,7 @@ export default function Home(_props: PageProps) {
             </div>
           </div>
           <p>
-            Four backends, picked automatically per platform.{" "}
+            Five backends, picked automatically per platform.{" "}
             <a href="/reference#backends">Read how they differ</a> — the choice
             is visible, and two of them have a cost worth knowing about.
           </p>
