@@ -74,7 +74,7 @@ export default function InstallTabs() {
         <span class="p">$ </span>
         <b>ralon --version</b>
         {"\n"}
-        ralon 0.1.6
+        ralon 0.1.7
       </pre>
     </div>
   );
